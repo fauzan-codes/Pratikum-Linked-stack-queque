@@ -1,9 +1,10 @@
+// Tugas pratikum struktur data semester 2
+
 #include <iostream>
 #include <string>
 #include <limits>
 #include <thread>
 using namespace std;
-
 
 
 struct Buku {
@@ -22,11 +23,14 @@ struct Node {
 
 Node* head = NULL;
 
+
+
 void clearError() {
     cin.clear(); 
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    this_thread::sleep_for(std::chrono::seconds(1));
+    this_thread::sleep_for(chrono::seconds(1));
 }
+
 
  
 void welcomeMSG() {
@@ -146,8 +150,12 @@ void insertBuku(Buku bukuBaru) {
 
 
 void addBuku() {
-
     Buku bukuBaru;
+
+    cout << endl;
+    cout << "===========================" << endl;
+    cout << "       Menambah Buku       " << endl;
+    cout << "===========================" << endl;
 
     cin.ignore();
     cout << "Masukkan judul buku: ";
@@ -179,11 +187,16 @@ void addBuku() {
     insertBuku(bukuBaru);
 
     cout << "Buku berhasil ditambahkan!" << endl;
-    this_thread::sleep_for(std::chrono::seconds(1));
+    this_thread::sleep_for(chrono::seconds(1));
 }
 
 
 void deleteBuku() {
+
+    cout << endl;
+    cout << "===========================" << endl;
+    cout << "       Menghapus Buku      " << endl;
+    cout << "===========================" << endl;
 
     if (head == NULL) {
         cout << "Belum ada data buku." << endl;
@@ -201,11 +214,11 @@ void deleteBuku() {
         head = current->next;
         delete current;
         cout << "Buku berhasil dihapus." << endl;
-        this_thread::sleep_for(std::chrono::seconds(1));
+        this_thread::sleep_for(chrono::seconds(1));
         return;
     }
 
-    // Cari node yang ingin dihapus
+    // Cari buku yang ingin dihapus
     while (current != NULL && current->data.id != idHapus) {
         prev = current;
         current = current->next;
@@ -213,7 +226,7 @@ void deleteBuku() {
 
     if (current == NULL) {
         cout << "ID tidak ditemukan." << endl;
-        this_thread::sleep_for(std::chrono::seconds(1));
+        this_thread::sleep_for(chrono::seconds(1));
         return;
     }
 
@@ -221,11 +234,16 @@ void deleteBuku() {
     delete current;
 
     cout << "Buku berhasil dihapus." << endl;
-    this_thread::sleep_for(std::chrono::seconds(1));
+    this_thread::sleep_for(chrono::seconds(1));
 }
 
 
 void editBuku() {
+
+    cout << endl;
+    cout << "===========================" << endl;
+    cout << "       Mengedit Buku       " << endl;
+    cout << "===========================" << endl;
 
     if (head == NULL) {
         cout << "Belum ada data buku." << endl;
@@ -244,7 +262,7 @@ void editBuku() {
 
     if (current == NULL) {
         cout << "ID tidak ditemukan." << endl;
-        this_thread::sleep_for(std::chrono::seconds(1));
+        this_thread::sleep_for(chrono::seconds(1));
         return;
     }
 
@@ -277,41 +295,14 @@ void editBuku() {
     current->data.id = generateID(current->data.judul, current->data.tahunTerbit);
 
     cout << "Data buku berhasil diubah!" << endl;
-    this_thread::sleep_for(std::chrono::seconds(1));
+    this_thread::sleep_for(chrono::seconds(1));
 }
 
 
 
 
-// tampilan
-void tampilSemua() {
-
-    if (head == NULL) {
-        cout << "Belum ada data buku." << endl;
-        return;
-    }
-
-    Node* current = head;
-
-    while (current != NULL) {
-        cout << "----------------------" << endl;
-        cout << "ID      : " << current->data.id << endl;
-        cout << "Judul   : " << current->data.judul << endl;
-        cout << "Penulis : " << current->data.penulis << endl;
-        cout << "Tahun   : " << current->data.tahunTerbit << endl;
-        cout << "Genre   : " << current->data.genre << endl;
-        cout << "Status  : "
-             << (current->data.Tersedia ? "Tersedia" : "Tidak Tersedia") 
-             << endl;
-
-        current = current->next;
-    }
-}
-
-
-
-// =========== menu pengunjung ===========
-void menuPengunjungAksi() {
+// =========== tampilan ===========
+void tampilan() {
 
     if (head == NULL) {
         cout << "Belum ada data buku." << endl;
@@ -339,11 +330,11 @@ void menuPengunjungAksi() {
 
         // Menampilkan 1 buku
         cout << "\n--------------------------------------" << endl;
-        cout << "Judul : " << current->data.judul << endl;
-        cout << "Id : " << current->data.id << endl;
-        cout << "Penulis : " << current->data.penulis << endl;
-        cout << "Tahun : " << current->data.tahunTerbit << endl;
-        cout << "Genre : " << current->data.genre << endl;
+        cout << "Judul        : " << current->data.judul << endl;
+        cout << "Id           : " << current->data.id << endl;
+        cout << "Penulis      : " << current->data.penulis << endl;
+        cout << "Tahun        : " << current->data.tahunTerbit << endl;
+        cout << "Genre        : " << current->data.genre << endl;
         cout << "Ketersediaan : "
              << (current->data.Tersedia ? "Tersedia" : "Tidak Tersedia")
              << endl;
@@ -454,6 +445,7 @@ int main() {
                     }
                 }
 
+
                 if (pilihanAdmin == 0) {
                     break;
                 }
@@ -463,12 +455,7 @@ int main() {
                 }
 
                 else if (pilihanAdmin == 2) {
-                    tampilSemua();
-
-                    string enter;
-                    cout << endl << "Tekan Enter untuk kembali ke menu utama...";
-                    cin.ignore();
-                    getline(cin, enter); 
+                    tampilan();
                 }
 
                 else if (pilihanAdmin == 3) {
@@ -482,7 +469,7 @@ int main() {
         }
 
         else if (pilihanUtama == 2) {  // Pengunjung
-            menuPengunjungAksi();
+            tampilan();
         }
     }
 
