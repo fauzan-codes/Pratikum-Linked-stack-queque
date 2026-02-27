@@ -302,9 +302,11 @@ void editBuku() {
 
 
 // =========== tampilan ===========
-void tampilan() {
+void tampilanAdmin() {
+
 
     if (head == NULL) {
+
         cout << "Belum ada data buku." << endl;
 
         string enter;
@@ -329,7 +331,99 @@ void tampilan() {
         }
 
         // Menampilkan 1 buku
-        cout << "\n--------------------------------------" << endl;
+        cout << endl;
+        cout << "------------ List Buku -------------" << endl;
+        cout << "Judul        : " << current->data.judul << endl;
+        cout << "Id           : " << current->data.id << endl;
+        cout << "Penulis      : " << current->data.penulis << endl;
+        cout << "Tahun        : " << current->data.tahunTerbit << endl;
+        cout << "Genre        : " << current->data.genre << endl;
+        cout << "Ketersediaan : "
+             << (current->data.Tersedia ? "Tersedia" : "Tidak Tersedia")
+             << endl;
+        cout << "--------------------------------------" << endl;
+
+        while(true){
+            cout << "1. Selanjutnya" << endl;
+            cout << "2. Sebelumnya" << endl;
+            cout << "0. Keluar" << endl;
+            cout << "> ";
+            cin >> pilihan;
+
+            if (cin.fail() || pilihan < 0 || pilihan > 2) {
+                cout << "Input tidak valid! Harap masukkan angka." << endl;
+                clearError();
+                continue;
+            } else {
+                break;
+            }
+        }
+
+
+        if (pilihan == 0) break;
+
+        // Hitung isi buku
+        int total = 0;
+        Node* temp = head;
+        while (temp != NULL) {
+            total++;
+            temp = temp->next;
+        }
+
+        // next
+        if (pilihan == 1) { 
+            index++;
+            if (index >= total) {
+                index = 0; 
+            }
+        }
+
+        // previous
+        else if (pilihan == 2) {
+            index--;
+            if (index < 0) {
+                index = total - 1;
+            }
+        }
+
+        else {
+            cout << "Pilihan tidak valid." << endl;
+        }
+    }
+}
+
+
+void tampilanPengunjung() {
+
+    if (head == NULL) {
+
+
+        cout << "Belum ada data buku." << endl;
+
+        string enter;
+        cout << endl << "Tekan Enter untuk kembali ke menu utama...";
+        cin.ignore();
+        getline(cin, enter);
+
+        return;
+    }
+
+    int index = 0;
+    int pilihan;
+
+    while (true) {
+
+        Node* current = head;
+        int counter = 0;
+
+        while (counter < index) {
+            current = current->next;
+            counter++;
+        }
+
+        // Menampilkan 1 buku
+        cout << endl;
+        cout << "------------ List Buku -------------" << endl;
         cout << "Judul        : " << current->data.judul << endl;
         cout << "Id           : " << current->data.id << endl;
         cout << "Penulis      : " << current->data.penulis << endl;
@@ -386,7 +480,13 @@ void tampilan() {
 
         // pinjam
         else if (pilihan == 3) {
-            cout << "Fitur peminjaman belum tersedia." << endl;
+
+            if (ketersediaan true){
+                cout << "Fitur ini belum tersedia" << endl;
+            }else{
+                cout << "Buku ini tidak tersedia" << endl;
+            }
+
         }
 
         else {
@@ -455,7 +555,7 @@ int main() {
                 }
 
                 else if (pilihanAdmin == 2) {
-                    tampilan();
+                    tampilanAdmin();
                 }
 
                 else if (pilihanAdmin == 3) {
@@ -469,7 +569,7 @@ int main() {
         }
 
         else if (pilihanUtama == 2) {  // Pengunjung
-            tampilan();
+            tampilanPengunjung();
         }
     }
 
