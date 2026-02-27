@@ -22,6 +22,12 @@ struct Node {
 
 Node* head = NULL;
 
+void clearError() {
+    cin.clear(); 
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    this_thread::sleep_for(std::chrono::seconds(1));
+}
+
 
 void welcomeMSG() {
     cout << endl;
@@ -47,35 +53,11 @@ void menuAdmin() {
 }
 
 
-void menuPengunjung() {
-    cout << endl;
-    cout << "===========================" << endl;
-    cout << "    dasboard pengunjung    " << endl;
-    cout << "===========================" << endl;
-    
-    cout << "Manakah yang ingin kamu pinjam?" << endl;
-    cout << "---------------------------" << endl;
-    // disini 1 data buku akan tampil.
-    cout << "---------------------------" << endl;
-    cout << "1. Selanjutnya" << endl;
-    cout << "2. Sebelumnya" << endl;
-    cout << "3. pinjam buku" << endl;
-    cout << "0. Keluar" << endl << endl;
-}
 
 
 
 
-
-
-
-void clearError() {
-    cin.clear(); 
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    this_thread::sleep_for(std::chrono::seconds(1));
-}
-
-// cek id yang sudah ada
+// ===== ID ======
 bool isIdExist(string id) {
 
     Node* current = head;
@@ -139,6 +121,10 @@ string generateID(string judul, int tahunTerbit) {
     return id;
 }
 
+
+
+
+// Management Buku
 void insertBuku(Buku bukuBaru) {
 
     Node* newNode = new Node;
@@ -195,6 +181,7 @@ void addBuku() {
     cout << "Buku berhasil ditambahkan!" << endl;
     this_thread::sleep_for(std::chrono::seconds(1));
 }
+
 
 void deleteBuku() {
 
@@ -257,6 +244,7 @@ void editBuku() {
 
     if (current == NULL) {
         cout << "ID tidak ditemukan." << endl;
+        this_thread::sleep_for(std::chrono::seconds(1));
         return;
     }
 
@@ -289,10 +277,13 @@ void editBuku() {
     current->data.id = generateID(current->data.judul, current->data.tahunTerbit);
 
     cout << "Data buku berhasil diubah!" << endl;
-
+    this_thread::sleep_for(std::chrono::seconds(1));
 }
 
 
+
+
+// tampilan
 void tampilSemua() {
 
     if (head == NULL) {
@@ -310,13 +301,12 @@ void tampilSemua() {
         cout << "Tahun   : " << current->data.tahunTerbit << endl;
         cout << "Genre   : " << current->data.genre << endl;
         cout << "Status  : "
-             << (current->data.Tersedia ? "Tersedia" : "Dipinjam") 
+             << (current->data.Tersedia ? "Tersedia" : "Tidak Tersedia") 
              << endl;
 
         current = current->next;
     }
 }
-
 
 
 
@@ -339,7 +329,6 @@ void menuPengunjungAksi() {
 
     while (true) {
 
-        // Cari node berdasarkan index
         Node* current = head;
         int counter = 0;
 
@@ -348,7 +337,7 @@ void menuPengunjungAksi() {
             counter++;
         }
 
-        // Tampilkan 1 buku
+        // Menampilkan 1 buku
         cout << "\n--------------------------------------" << endl;
         cout << "Judul : " << current->data.judul << endl;
         cout << "Id : " << current->data.id << endl;
@@ -356,20 +345,31 @@ void menuPengunjungAksi() {
         cout << "Tahun : " << current->data.tahunTerbit << endl;
         cout << "Genre : " << current->data.genre << endl;
         cout << "Ketersediaan : "
-             << (current->data.Tersedia ? "Tersedia" : "Dipinjam")
+             << (current->data.Tersedia ? "Tersedia" : "Tidak Tersedia")
              << endl;
         cout << "--------------------------------------" << endl;
 
-        cout << "1. Selanjutnya" << endl;
-        cout << "2. Sebelumnya" << endl;
-        cout << "3. Pinjam" << endl;
-        cout << "0. Keluar" << endl;
-        cout << "> ";
-        cin >> pilihan;
+        while(true){
+            cout << "1. Selanjutnya" << endl;
+            cout << "2. Sebelumnya" << endl;
+            cout << "3. Pinjam" << endl;
+            cout << "0. Keluar" << endl;
+            cout << "> ";
+            cin >> pilihan;
+
+            if (cin.fail() || pilihan < 0 || pilihan > 3) {
+                cout << "Input tidak valid! Harap masukkan angka." << endl;
+                clearError();
+                continue;
+            } else {
+                break;
+            }
+        }
+
 
         if (pilihan == 0) break;
 
-        // Hitung total node
+        // Hitung isi buku
         int total = 0;
         Node* temp = head;
         while (temp != NULL) {
@@ -377,20 +377,23 @@ void menuPengunjungAksi() {
             temp = temp->next;
         }
 
-        if (pilihan == 1) { // next
+        // next
+        if (pilihan == 1) { 
             index++;
             if (index >= total) {
-                index = 0; // balik ke awal
+                index = 0; 
             }
         }
 
-        else if (pilihan == 2) { // previous
+        // previous
+        else if (pilihan == 2) {
             index--;
             if (index < 0) {
-                index = total - 1; // ke terakhir
+                index = total - 1;
             }
         }
 
+        // pinjam
         else if (pilihan == 3) {
             cout << "Fitur peminjaman belum tersedia." << endl;
         }
