@@ -169,7 +169,7 @@ void addBuku() {
         cin >> bukuBaru.tahunTerbit;
 
         if (cin.fail() || bukuBaru.tahunTerbit < 1000 || bukuBaru.tahunTerbit > 2026) {
-            cout << endl << "Input tidak valid! Harap masukkan angka." << endl << endl;
+            cout << endl << "Input tidak valid! Harap masukkan angka dengan benar." << endl << endl;
             clearError();
             continue;
         } else {
@@ -200,6 +200,7 @@ void deleteBuku() {
 
     if (head == NULL) {
         cout << "Belum ada data buku." << endl;
+        this_thread::sleep_for(chrono::seconds(1));
         return;
     }
 
@@ -210,15 +211,6 @@ void deleteBuku() {
     Node* current = head;
     Node* prev = NULL;
 
-    if (current != NULL && current->data.id == idHapus) {
-        head = current->next;
-        delete current;
-        cout << "Buku berhasil dihapus." << endl;
-        this_thread::sleep_for(chrono::seconds(1));
-        return;
-    }
-
-    // Cari buku yang ingin dihapus
     while (current != NULL && current->data.id != idHapus) {
         prev = current;
         current = current->next;
@@ -230,8 +222,36 @@ void deleteBuku() {
         return;
     }
 
-    prev->next = current->next;
-    delete current;
+    // Tampilkan detail buku
+    cout << endl;
+    cout << "------------ Detail Buku -------------" << endl;
+    cout << "Judul        : " << current->data.judul << endl;
+    cout << "Id           : " << current->data.id << endl;
+    cout << "Penulis      : " << current->data.penulis << endl;
+    cout << "Tahun        : " << current->data.tahunTerbit << endl;
+    cout << "Genre        : " << current->data.genre << endl;
+    cout << "Ketersediaan : " << (current->data.Tersedia ? "Tersedia" : "Tidak Tersedia") << endl;
+    cout << "--------------------------------------" << endl;
+
+    string konfirmasi;
+    cout << endl;
+    cout << "Apakah anda yakin ingin menghapus buku ini? (y/n): ";
+    cin >> konfirmasi;
+
+    if (konfirmasi != "y" && konfirmasi != "Y") {
+        cout << "Penghapusan dibatalkan." << endl;
+        this_thread::sleep_for(chrono::seconds(1));
+        return;
+    }
+
+    // Jika yang dihapus adalah head
+    if (current == head) {
+        head = current->next;
+        delete current;
+    } else {
+        prev->next = current->next;
+        delete current;
+    }   
 
     cout << "Buku berhasil dihapus." << endl;
     this_thread::sleep_for(chrono::seconds(1));
@@ -247,6 +267,7 @@ void editBuku() {
 
     if (head == NULL) {
         cout << "Belum ada data buku." << endl;
+        this_thread::sleep_for(chrono::seconds(1));
         return;
     }
 
@@ -266,36 +287,85 @@ void editBuku() {
         return;
     }
 
-    cin.ignore();
-    cout << "Masukkan judul baru: ";
-    getline(cin, current->data.judul);
+    cout << endl;
+    cout << "------------ Detail Buku -------------" << endl;
+    cout << "Judul        : " << current->data.judul << endl;
+    cout << "Id           : " << current->data.id << endl;
+    cout << "Penulis      : " << current->data.penulis << endl;
+    cout << "Tahun        : " << current->data.tahunTerbit << endl;
+    cout << "Genre        : " << current->data.genre << endl;
+    cout << "Ketersediaan : " << (current->data.Tersedia ? "Tersedia" : "Tidak Tersedia") << endl;
+    cout << "--------------------------------------" << endl;
 
-    cout << "Masukkan penulis baru: ";
-    getline(cin, current->data.penulis);
+    cout << endl;
+    cout << "1. Ubah judul" << endl;
+    cout << "2. Ubah penulis" << endl;
+    cout << "3. Ubah tahun terbit" << endl;
+    cout << "4. Ubah genre" << endl;
+    cout << "5. Ubah ketersediaan" << endl;
+    cout << "0. Keluar" << endl;
+    cout << "Pilih: ";
     
-    while (true) {
-        int tahun;
-        cout << "Masukkan tahun terbit baru: ";
-        cin >> tahun;
-        if (cin.fail() || tahun < 1000 || tahun > 2026) {
-            cout << endl << "Input tidak valid! Harap masukkan angka." << endl << endl;
+    int pilihanEdit;
+    while(true){
+        cin >> pilihanEdit;
+
+        if (cin.fail() || pilihanEdit < 0 || pilihanEdit > 5) {
+            cout << "Input tidak valid! Harap masukkan angka dengan benar." << endl;
             clearError();
+            cout << "Pilih: ";
             continue;
         } else {
-            current->data.tahunTerbit = tahun;
             break;
         }
     }
 
+    cout << endl;
     cin.ignore();
-    cout << "Masukkan genre baru: ";
-    getline(cin, current->data.genre);
 
-    // perbarui id yg data yg berubah
+    if (pilihanEdit == 1) {
+
+        cout << "Masukkan judul baru: ";
+        getline(cin, current->data.judul);
+
+    } else if (pilihanEdit == 2) {
+
+        cout << "Masukkan penulis baru: ";
+        getline(cin, current->data.penulis);
+
+    } else if (pilihanEdit == 3) {
+
+        cout << "Masukkan tahun terbit baru: ";
+        cin >> current->data.tahunTerbit;
+
+    } else if (pilihanEdit == 4) {
+
+        cout << "Masukkan genre baru: ";
+        getline(cin, current->data.genre);
+
+    } else if (pilihanEdit == 5) {
+
+        current->data.Tersedia = !current->data.Tersedia;
+        cout << "Status ketersediaan berhasil diubah." << endl;
+
+    } else if (pilihanEdit == 0) {
+        return;
+    }
+    
     current->data.id = generateID(current->data.judul, current->data.tahunTerbit);
+    cout << "Data buku dan ID berhasil disimpan!" << endl;
 
-    cout << "Data buku berhasil diubah!" << endl;
-    this_thread::sleep_for(chrono::seconds(1));
+    cout << endl;
+    cout << "------------ Detail Buku -------------" << endl;
+    cout << "Judul        : " << current->data.judul << endl;
+    cout << "Id           : " << current->data.id << endl;
+    cout << "Penulis      : " << current->data.penulis << endl;
+    cout << "Tahun        : " << current->data.tahunTerbit << endl;
+    cout << "Genre        : " << current->data.genre << endl;
+    cout << "Ketersediaan : " << (current->data.Tersedia ? "Tersedia" : "Tidak Tersedia") << endl;
+    cout << "--------------------------------------" << endl;
+
+    this_thread::sleep_for(chrono::seconds(2));
 }
 
 
@@ -338,9 +408,7 @@ void tampilanAdmin() {
         cout << "Penulis      : " << current->data.penulis << endl;
         cout << "Tahun        : " << current->data.tahunTerbit << endl;
         cout << "Genre        : " << current->data.genre << endl;
-        cout << "Ketersediaan : "
-             << (current->data.Tersedia ? "Tersedia" : "Tidak Tersedia")
-             << endl;
+        cout << "Ketersediaan : " << (current->data.Tersedia ? "Tersedia" : "Tidak Tersedia") << endl;
         cout << "--------------------------------------" << endl;
 
         while(true){
@@ -351,7 +419,7 @@ void tampilanAdmin() {
             cin >> pilihan;
 
             if (cin.fail() || pilihan < 0 || pilihan > 2) {
-                cout << "Input tidak valid! Harap masukkan angka." << endl;
+                cout << "Input tidak valid! Harap masukkan angka dengan benar." << endl;
                 clearError();
                 continue;
             } else {
@@ -429,9 +497,7 @@ void tampilanPengunjung() {
         cout << "Penulis      : " << current->data.penulis << endl;
         cout << "Tahun        : " << current->data.tahunTerbit << endl;
         cout << "Genre        : " << current->data.genre << endl;
-        cout << "Ketersediaan : "
-             << (current->data.Tersedia ? "Tersedia" : "Tidak Tersedia")
-             << endl;
+        cout << "Ketersediaan : " << (current->data.Tersedia ? "Tersedia" : "Tidak Tersedia") << endl;
         cout << "--------------------------------------" << endl;
 
         while(true){
@@ -443,7 +509,7 @@ void tampilanPengunjung() {
             cin >> pilihan;
 
             if (cin.fail() || pilihan < 0 || pilihan > 3) {
-                cout << "Input tidak valid! Harap masukkan angka." << endl;
+                cout << "Input tidak valid! Harap masukkan angka dengan benar." << endl;
                 clearError();
                 continue;
             } else {
@@ -481,11 +547,13 @@ void tampilanPengunjung() {
         // pinjam
         else if (pilihan == 3) {
 
-            if (ketersediaan true){
-                cout << "Fitur ini belum tersedia" << endl;
-            }else{
-                cout << "Buku ini tidak tersedia" << endl;
+            if (current->data.Tersedia) {
+                cout << "Buku berhasil dipinjam." << endl;
+                current->data.Tersedia = false;
+            } else {
+                cout << "Buku ini tidak tersedia." << endl;
             }
+            this_thread::sleep_for(chrono::seconds(1));
 
         }
 
@@ -511,7 +579,7 @@ int main() {
             cin >> pilihanUtama;
 
             if (cin.fail() || pilihanUtama < 0 || pilihanUtama > 2) {
-                cout << "Input tidak valid! Harap masukkan angka." << endl;
+                cout << "Input tidak valid! Harap masukkan angka dengan benar." << endl;
                 clearError();
                 continue;
             } else {
@@ -537,7 +605,7 @@ int main() {
                     cin >> pilihanAdmin;
 
                     if (cin.fail() || pilihanAdmin < 0 || pilihanAdmin > 4) {
-                        cout << "Input tidak valid! Harap masukkan angka." << endl;
+                        cout << "Input tidak valid! Harap masukkan angka dengan benar." << endl;
                         clearError();
                         continue;
                     } else {
