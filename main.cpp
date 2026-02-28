@@ -327,6 +327,7 @@ void editBuku() {
 
         cout << "Masukkan judul baru: ";
         getline(cin, current->data.judul);
+        current->data.id = generateID(current->data.judul, current->data.tahunTerbit);
 
     } else if (pilihanEdit == 2) {
 
@@ -335,8 +336,18 @@ void editBuku() {
 
     } else if (pilihanEdit == 3) {
 
-        cout << "Masukkan tahun terbit baru: ";
-        cin >> current->data.tahunTerbit;
+        while (true) {
+            cout << "Masukkan tahun terbit baru: ";
+            cin >> current->data.tahunTerbit;
+            if (cin.fail() || current->data.tahunTerbit < 1000 || current->data.tahunTerbit > 2026) {
+                cout << endl << "Input tidak valid! Harap masukkan angka dengan benar." << endl << endl;
+                clearError();
+                continue;
+            } else {
+                break;
+            }
+        }
+        current->data.id = generateID(current->data.judul, current->data.tahunTerbit);
 
     } else if (pilihanEdit == 4) {
 
@@ -352,7 +363,6 @@ void editBuku() {
         return;
     }
     
-    current->data.id = generateID(current->data.judul, current->data.tahunTerbit);
     cout << "Data buku dan ID berhasil disimpan!" << endl;
 
     cout << endl;
