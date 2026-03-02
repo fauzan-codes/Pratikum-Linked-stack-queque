@@ -244,7 +244,7 @@ void deleteBuku() {
         return;
     }
 
-    // Jika yang dihapus adalah head
+    
     if (current == head) {
         head = current->next;
         delete current;
