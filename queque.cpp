@@ -4,6 +4,8 @@
 #include <string>
 #include <limits>
 #include <thread>
+#include <ctime>
+#include <sstream>
 using namespace std;
 
 // struct data buku linked list
@@ -43,10 +45,37 @@ NodePinjam* rearPinjam = NULL;
 
 
 
+// clear error input
 void clearError() {
     cin.clear(); 
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
     this_thread::sleep_for(chrono::seconds(1));
+}
+
+// cek string yang isinya hanya angka
+bool hanyaAngka(string s) {
+    for (char c : s) {
+        if (!isdigit(c)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+
+string getTanggalSekarang() {
+    time_t now = time(0);
+    tm *ltm = localtime(&now);
+
+    stringstream ss;
+
+    ss << ltm->tm_mday << " "
+       << (ltm->tm_mon + 1) << " "
+       << (1900 + ltm->tm_year) << " "
+       << ltm->tm_hour << ":"
+       << ltm->tm_min;
+
+    return ss.str();
 }
 
 
@@ -683,7 +712,7 @@ void tampilanPengunjung() {
 
             if (!current->data.Tersedia) {
                 cout << "Buku tidak tersedia." << endl;
-                this_thread::sleep_for(chrono::seconds(1));
+                this_thread::sleep_for(chrono::seconds(2));
                 continue;
             }
 
@@ -693,11 +722,21 @@ void tampilanPengunjung() {
             cout << "Masukkan nama peminjam > ";
             getline(cin, pinjam.nama);
 
-            cout << "Masukkan NIM peminjam > ";
-            cin >> pinjam.nim;
+            while (true) {
+                cout << "Masukkan NIM peminjam > ";
+                cin >> pinjam.nim;
+
+                if (!hanyaAngka(pinjam.nim)) {
+                    cout << "NIM harus berupa angka!" << endl << endl;
+                    clearError();
+                    continue;
+                } else {
+                    break;
+                }
+            }
 
             pinjam.judul = current->data.judul;
-            pinjam.tanggal = "8 Maret 2025 08:50";
+            pinjam.tanggal = getTanggalSekarang();
 
             static int nomor = 1;
             pinjam.id = generateIDPinjam(current->data, pinjam.nama, nomor);
@@ -717,7 +756,7 @@ void tampilanPengunjung() {
             cout << "--------------------------------------" << endl;
 
             cout << "Menunggu persetujuan pegawai" << endl;
-            this_thread::sleep_for(chrono::seconds(3));
+            this_thread::sleep_for(chrono::seconds(2));
         }
 
         else {
