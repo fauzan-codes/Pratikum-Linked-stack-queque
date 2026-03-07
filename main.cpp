@@ -76,7 +76,7 @@ bool isIdExist(string id) {
     return false;
 }
 
-string generateID(string judul, int tahunTerbit) {
+string generateIDBuku(string judul, int tahunTerbit) {
     // digit2
     char hurufPertama = judul[0];
     char hurufTerakhir = judul[judul.length() - 1];
@@ -182,7 +182,7 @@ void addBuku() {
     getline(cin, bukuBaru.genre);
 
     bukuBaru.Tersedia = true;
-    bukuBaru.id = generateID(bukuBaru.judul, bukuBaru.tahunTerbit);
+    bukuBaru.id = generateIDBuku(bukuBaru.judul, bukuBaru.tahunTerbit);
 
     insertBuku(bukuBaru);
 
@@ -327,7 +327,7 @@ void editBuku() {
 
         cout << "Masukkan judul baru: ";
         getline(cin, current->data.judul);
-        current->data.id = generateID(current->data.judul, current->data.tahunTerbit);
+        current->data.id = generateIDBuku(current->data.judul, current->data.tahunTerbit);
 
     } else if (pilihanEdit == 2) {
 
@@ -347,7 +347,7 @@ void editBuku() {
                 break;
             }
         }
-        current->data.id = generateID(current->data.judul, current->data.tahunTerbit);
+        current->data.id = generateIDBuku(current->data.judul, current->data.tahunTerbit);
 
     } else if (pilihanEdit == 4) {
 

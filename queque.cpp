@@ -29,7 +29,7 @@ struct Pinjaman {
     string id;
     string judul;
     string nama;
-    int nim;
+    string nim;
     string tanggal;
 };
 
@@ -80,11 +80,42 @@ void menuAdmin() {
 
 
 
+void enqueuePinjam(Pinjaman pinjam) {
+
+    NodePinjam* newNode = new NodePinjam;
+    newNode->data = pinjam;
+    newNode->next = NULL;
+
+    if (rearPinjam == NULL) {
+        frontPinjam = rearPinjam = newNode;
+    } else {
+        rearPinjam->next = newNode;
+        rearPinjam = newNode;
+    }
+}
+
+
+void dequeuePinjam() {
+
+    if (frontPinjam == NULL){
+        return;
+    }
+
+    NodePinjam* temp = frontPinjam;
+    frontPinjam = frontPinjam->next;
+
+    if (frontPinjam == NULL){
+        rearPinjam = NULL;
+    }
+
+    delete temp;
+}
+
+
 // ===== ID ======
 bool isIdExist(string id) {
 
     Node* current = head;
-
     while (current != NULL) {
         if (current->data.id == id) {
             return true;
@@ -95,7 +126,8 @@ bool isIdExist(string id) {
     return false;
 }
 
-string generateID(string judul, int tahunTerbit) {
+// ID untuk buku
+string generateIDBuku(string judul, int tahunTerbit) {
     // digit2
     char hurufPertama = judul[0];
     char hurufTerakhir = judul[judul.length() - 1];
@@ -122,7 +154,6 @@ string generateID(string judul, int tahunTerbit) {
     } else {
         id2 = to_string(selisih);
     }
-    
 
     if (jumlahTahun < 10) {
         id4 = "0" + to_string(jumlahTahun);
@@ -132,16 +163,36 @@ string generateID(string judul, int tahunTerbit) {
 
     string baseID = id2 + id4;
 
-    
     string id = baseID + "0"; 
     int counter = 0;
-
     while (isIdExist(id)) {
         counter++;
         id = baseID + to_string(counter);
     }
 
     return id;
+}
+
+// ID untuk pinjaman
+string generateIDPinjam(Buku buku, string nama, int nomor) {
+
+    string idBuku = buku.id.substr(0,5);
+    char kategori = tolower(buku.genre[0]);
+
+    string tahun = "25"; 
+
+    string inisial = "";
+    inisial += tolower(nama[0]);
+    inisial += tolower(nama[1]);
+
+    string urut;
+
+    if (nomor < 10)
+        urut = "0" + to_string(nomor);
+    else
+        urut = to_string(nomor);
+
+    return idBuku + kategori + tahun + inisial + urut;
 }
 
 
@@ -201,7 +252,7 @@ void addBuku() {
     getline(cin, bukuBaru.genre);
 
     bukuBaru.Tersedia = true;
-    bukuBaru.id = generateID(bukuBaru.judul, bukuBaru.tahunTerbit);
+    bukuBaru.id = generateIDBuku(bukuBaru.judul, bukuBaru.tahunTerbit);
 
     insertBuku(bukuBaru);
 
@@ -346,7 +397,7 @@ void editBuku() {
 
         cout << "Masukkan judul baru: ";
         getline(cin, current->data.judul);
-        current->data.id = generateID(current->data.judul, current->data.tahunTerbit);
+        current->data.id = generateIDBuku(current->data.judul, current->data.tahunTerbit);
 
     } else if (pilihanEdit == 2) {
 
@@ -366,7 +417,7 @@ void editBuku() {
                 break;
             }
         }
-        current->data.id = generateID(current->data.judul, current->data.tahunTerbit);
+        current->data.id = generateIDBuku(current->data.judul, current->data.tahunTerbit);
 
     } else if (pilihanEdit == 4) {
 
@@ -395,6 +446,60 @@ void editBuku() {
     cout << "--------------------------------------" << endl;
 
     this_thread::sleep_for(chrono::seconds(2));
+}
+
+
+void prosesPinjaman() {
+
+    cout << endl;
+    if (frontPinjam == NULL) {
+        cout << "Tidak ada pinjaman untuk diproses !!" << endl;
+        this_thread::sleep_for(chrono::seconds(2));
+        return;
+    }
+
+    int nomor = 1;
+
+    while (frontPinjam != NULL) {
+
+        Pinjaman p = frontPinjam->data;
+
+        cout << "======================================" << endl;
+        cout << "PINJAMAN KE-" << nomor << endl;
+        cout << "======================================" << endl;
+
+        cout << "--------------------------------------" << endl;
+        cout << "Id : " << p.id << endl;
+        cout << "Judul : " << p.judul << endl;
+        cout << "Nama : " << p.nama << endl;
+        cout << "NIM : " << p.nim << endl;
+        cout << "Tanggal : " << p.tanggal << endl;
+        cout << "--------------------------------------" << endl;
+
+        cout << "1. Setujui" << endl;
+        cout << "2. Tolak" << endl;
+        cout << "0. Keluar" << endl;
+        cout << "> ";
+
+        int pilih;
+        cin >> pilih;
+
+        if (pilih == 1) {
+            cout << "Pinjaman dengan id " << p.id << " telah diproses !!" << endl;
+            dequeuePinjam();
+        }
+
+        else if (pilih == 2) {
+            cout << "Pinjaman ditolak." << endl;
+            dequeuePinjam();
+        }
+
+        else if (pilih == 0) {
+            break;
+        }
+
+        nomor++;
+    }
 }
 
 
@@ -576,14 +681,43 @@ void tampilanPengunjung() {
         // pinjam
         else if (pilihan == 3) {
 
-            if (current->data.Tersedia) {
-                cout << "Buku berhasil dipinjam." << endl;
-                current->data.Tersedia = false;
-            } else {
-                cout << "Buku ini tidak tersedia." << endl;
+            if (!current->data.Tersedia) {
+                cout << "Buku tidak tersedia." << endl;
+                this_thread::sleep_for(chrono::seconds(1));
+                continue;
             }
-            this_thread::sleep_for(chrono::seconds(1));
 
+            Pinjaman pinjam;
+
+            cin.ignore();
+            cout << "Masukkan nama peminjam > ";
+            getline(cin, pinjam.nama);
+
+            cout << "Masukkan NIM peminjam > ";
+            cin >> pinjam.nim;
+
+            pinjam.judul = current->data.judul;
+            pinjam.tanggal = "8 Maret 2025 08:50";
+
+            static int nomor = 1;
+            pinjam.id = generateIDPinjam(current->data, pinjam.nama, nomor);
+
+            nomor++;
+            enqueuePinjam(pinjam);
+
+            cout << endl;
+            cout << "Permintaan pinjaman telah berhasil dibuat !!" << endl;
+
+            cout << "--------------------------------------" << endl;
+            cout << "Id : " << pinjam.id << endl;
+            cout << "Judul : " << pinjam.judul << endl;
+            cout << "Nama : " << pinjam.nama << endl;
+            cout << "NIM : " << pinjam.nim << endl;
+            cout << "Tanggal : " << pinjam.tanggal << endl;
+            cout << "--------------------------------------" << endl;
+
+            cout << "Menunggu persetujuan pegawai" << endl;
+            this_thread::sleep_for(chrono::seconds(3));
         }
 
         else {
@@ -633,7 +767,7 @@ int main() {
                     cout << "Masukkan pilihan: ";
                     cin >> pilihanAdmin;
 
-                    if (cin.fail() || pilihanAdmin < 0 || pilihanAdmin > 4) {
+                    if (cin.fail() || pilihanAdmin < 0 || pilihanAdmin > 5) {
                         cout << "Input tidak valid! Harap masukkan angka dengan benar." << endl;
                         clearError();
                         continue;
@@ -661,6 +795,10 @@ int main() {
 
                 else if (pilihanAdmin == 4) {
                     deleteBuku();
+                }
+
+                else if (pilihanAdmin == 5) {
+                    prosesPinjaman();
                 }
             }
         }
