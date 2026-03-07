@@ -31,7 +31,7 @@ struct Pinjaman {
     string id;
     string judul;
     string nama;
-    string nim;
+    long long nim;
     string tanggal;
 };
 
@@ -52,28 +52,20 @@ void clearError() {
     this_thread::sleep_for(chrono::seconds(1));
 }
 
-// cek string yang isinya hanya angka
-bool hanyaAngka(string s) {
-    for (char c : s) {
-        if (!isdigit(c)) {
-            return false;
-        }
-    }
-    return true;
-}
 
+// tanggal sekarang
+string bulan[] = {
+"Januari","Februari","Maret","April","Mei","Juni",
+"Juli","Agustus","September","Oktober","November","Desember"
+};
 
-string getTanggalSekarang() {
+string TanggalSekarang() {
     time_t now = time(0);
     tm *ltm = localtime(&now);
 
     stringstream ss;
 
-    ss << ltm->tm_mday << " "
-       << (ltm->tm_mon + 1) << " "
-       << (1900 + ltm->tm_year) << " "
-       << ltm->tm_hour << ":"
-       << ltm->tm_min;
+    ss << ltm->tm_mday << " " << bulan[ltm->tm_mon] << " " << (1900 + ltm->tm_year) << " " << ltm->tm_hour << ":" << ltm->tm_min;
 
     return ss.str();
 }
@@ -257,8 +249,20 @@ void addBuku() {
     cout << "===========================" << endl;
 
     cin.ignore();
-    cout << "Masukkan judul buku: ";
-    getline(cin, bukuBaru.judul);
+    while (true) {
+
+        cout << "Masukkan judul buku: ";
+        getline(cin, bukuBaru.judul);
+        
+        if (bukuBaru.judul.empty() || bukuBaru.judul.length() < 2) {
+            cout << "Input tidak valid! Judul tidak boleh kosong." << endl;
+            cleanError();
+            continue;
+        } else {
+            break;
+        }
+
+    }
 
     cout << "Masukkan penulis buku: ";
     getline(cin, bukuBaru.penulis);
@@ -424,8 +428,17 @@ void editBuku() {
 
     if (pilihanEdit == 1) {
 
-        cout << "Masukkan judul baru: ";
-        getline(cin, current->data.judul);
+        while (true) {
+            cout << "Masukkan judul baru: ";
+            getline(cin, current->data.judul);
+
+            if (current->data.judul.empty() || current->data.judul.length() < 2) {
+                cout << "Input tidak valid! Judul tidak boleh kosong." << endl;
+                continue;
+            } else {
+                break;
+            }
+        }
         current->data.id = generateIDBuku(current->data.judul, current->data.tahunTerbit);
 
     } else if (pilihanEdit == 2) {
@@ -494,7 +507,7 @@ void prosesPinjaman() {
         Pinjaman p = frontPinjam->data;
 
         cout << "======================================" << endl;
-        cout << "PINJAMAN KE-" << nomor << endl;
+        cout << "              PINJAMAN KE-" << nomor << endl;
         cout << "======================================" << endl;
 
         cout << "--------------------------------------" << endl;
@@ -719,15 +732,24 @@ void tampilanPengunjung() {
             Pinjaman pinjam;
 
             cin.ignore();
-            cout << "Masukkan nama peminjam > ";
-            getline(cin, pinjam.nama);
+            while (true){
+                cout << "Masukkan nama peminjam > ";
+                getline(cin, pinjam.nama);
+
+                if (pinjam.nama.empty() || pinjam.nama.length() < 2) {
+                    cout << "Input tidak valid! Nama tidak boleh kosong." << endl;
+                    continue;
+                } else {
+                    break;
+                }
+            }
 
             while (true) {
                 cout << "Masukkan NIM peminjam > ";
                 cin >> pinjam.nim;
 
-                if (!hanyaAngka(pinjam.nim)) {
-                    cout << "NIM harus berupa angka!" << endl << endl;
+                if (cin.fail() || pinjam.nim <= 0) {
+                    cout << "Input tidak valid! Harap masukkan angka dengan benar." << endl;
                     clearError();
                     continue;
                 } else {
@@ -736,7 +758,7 @@ void tampilanPengunjung() {
             }
 
             pinjam.judul = current->data.judul;
-            pinjam.tanggal = getTanggalSekarang();
+            pinjam.tanggal = TanggalSekarang();
 
             static int nomor = 1;
             pinjam.id = generateIDPinjam(current->data, pinjam.nama, nomor);
