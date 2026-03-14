@@ -620,9 +620,18 @@ void riwayatPinjaman() {
         return;
     }
 
-    NodeRiwayat* current = headRiwayat;
+    int index = 0;
+    int pilihan;
 
-    while (current != NULL) {
+    while (true) {
+
+        NodeRiwayat* current = headRiwayat;
+        int counter = 0;
+
+        while (counter < index) {
+            current = current->next;
+            counter++;
+        }
 
         cout << "--------------------------------------" << endl;
         cout << "Id : " << current->data.id << endl;
@@ -633,44 +642,71 @@ void riwayatPinjaman() {
         cout << "--------------------------------------" << endl;
 
         cout << "1. Selanjutnya" << endl;
+        cout << "2. Sebelumnya" << endl;
         cout << "3. Kembalikan Buku" << endl;
         cout << "0. Kembali" << endl;
+        while(true){
+            cout << "> ";
+            cin >> pilihan;
 
-        int pilihan;
-        cin >> pilihan;
-
-        if (pilihan == 1) {
-            if (current->next == NULL) {
-                cout << "Kembali ke riwayat pertama..." << endl;
-                this_thread::sleep_for(chrono::seconds(1));
-                current = headRiwayat;
+            if (cin.fail() || pilihan < 0 || pilihan > 3) {
+                cout << "Input tidak valid! Harap masukkan angka dengan benar." << endl;
+                clearError();
+                continue;
             } else {
-                current = current->next;
+                break;
             }
         }
 
+        if (pilihan == 0)
+            break;
+
+        int total = 0;
+        NodeRiwayat* temp = headRiwayat;
+        while (temp != NULL) {
+            total++;
+            temp = temp->next;
+        }
+
+        // selanjutnya
+        if (pilihan == 1) {
+            index++;
+            if (index >= total)
+                index = 0;
+        }
+
+        // sebelumnya
+        else if (pilihan == 2) {
+            index--;
+            if (index < 0)
+                index = total - 1;
+        }
+
+        // kembalikan buku
         else if (pilihan == 3) {
+
             char konfirmasi;
             while (true) {
                 cout << "Apakah anda yakin ingin memproses pengembalian buku ini? (y/n) ";
                 cout << "> ";
                 cin >> konfirmasi;
-                if (konfirmasi == 'y' || konfirmasi == 'n' || konfirmasi == 'Y' || konfirmasi == 'N') {
+
+                if (konfirmasi == 'y' || konfirmasi == 'n' || konfirmasi == 'Y' || konfirmasi == 'N')
                     break;
-                }
+
                 clearError();
-                cout << "Input tidak valid. Silakan masukkan 'y' atau 'n'." << endl;
-                this_thread::sleep_for(chrono::seconds(1));
+                cout << "Input tidak valid." << endl;
             }
 
             if (konfirmasi == 'n' || konfirmasi == 'N') {
                 cout << "Pengembalian dibatalkan." << endl;
-                this_thread::sleep_for(chrono::seconds(1));
                 continue;
             }
 
             pushKembali(current->data);
-            cout << "Buku \"" << current->data.judul << "\" telah dikembalikan !!" << endl;
+
+            cout << "Buku \"" << current->data.judul 
+                 << "\" telah dikembalikan !!" << endl;
 
             NodeRiwayat* temp = headRiwayat;
             NodeRiwayat* prev = NULL;
@@ -680,20 +716,29 @@ void riwayatPinjaman() {
                 temp = temp->next;
             }
 
-            if (temp != NULL) {
-                if (prev == NULL)
-                    headRiwayat = temp->next;
-                else
-                    prev->next = temp->next;
+            if (prev == NULL)
+                headRiwayat = temp->next;
+            else
+                prev->next = temp->next;
 
-                delete temp;
+            delete temp;
+
+            int total = 0;
+            NodeRiwayat* cek = headRiwayat;
+            while (cek != NULL) {
+                total++;
+                cek = cek->next;
             }
 
-            break;
-        }
+            if (total == 0) {
+                cout << "Tidak ada riwayat pinjaman lagi." << endl;
+                return;
+            }
 
-        else if (pilihan == 0)
-            break;
+            if (index >= total) {
+                index = total - 1;
+            }
+        }
     }
 }
 
@@ -702,17 +747,17 @@ void prosesPengembalian() {
 
     if (topKembali == NULL) {
         cout << "Tidak ada pengembalian untuk diproses !!" << endl;
+        this_thread::sleep_for(chrono::seconds(2));
         return;
     }
 
     int nomor = 1;
-
     while (topKembali != NULL) {
 
         Pinjaman p = topKembali->data;
 
         cout << "======================================" << endl;
-        cout << "PENGEMBALIAN KE-" << nomor << endl;
+        cout << "         PENGEMBALIAN KE-" << nomor << endl;
         cout << "======================================" << endl;
 
         cout << "Id : " << p.id << endl;
@@ -738,6 +783,7 @@ void prosesPengembalian() {
             }
 
             cout << "Buku \"" << p.judul << "\" telah dikembalikan !!" << endl;
+            this_thread::sleep_for(chrono::seconds(1));
             popKembali();
         }
 
@@ -753,7 +799,6 @@ void prosesPengembalian() {
 
 // =========== tampilan ===========
 void tampilanAdmin() {
-
 
     if (head == NULL) {
 
