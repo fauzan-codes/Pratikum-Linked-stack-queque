@@ -62,21 +62,6 @@ struct NodeKembali {
 
 NodeKembali* topKembali = NULL;
 
-void pushKembali(Pinjaman p) {
-    NodeKembali* newNode = new NodeKembali;
-    newNode->data = p;
-    newNode->next = topKembali;
-    topKembali = newNode;
-}
-
-void popKembali() {
-    if (topKembali == NULL) return;
-
-    NodeKembali* temp = topKembali;
-    topKembali = topKembali->next;
-    delete temp;
-}
-
 
 
 // clear error input
@@ -239,7 +224,11 @@ string generateIDPinjam(Buku buku, string nama, int nomor) {
 
     string inisial = "";
     inisial += tolower(nama[0]);
-    inisial += tolower(nama[1]);
+
+    if(nama.length() > 1)
+        inisial += tolower(nama[1]);
+    else
+        inisial += 'x';
 
     string urut;
 
@@ -527,6 +516,22 @@ void editBuku() {
 
 
 
+void pushKembali(Pinjaman p) {
+    NodeKembali* newNode = new NodeKembali;
+    newNode->data = p;
+    newNode->next = topKembali;
+    topKembali = newNode;
+}
+
+void popKembali() {
+    if (topKembali == NULL) return;
+
+    NodeKembali* temp = topKembali;
+    topKembali = topKembali->next;
+    delete temp;
+}
+
+
 void tambahRiwayat(Pinjaman p) {
     NodeRiwayat* newNode = new NodeRiwayat;
     newNode->data = p;
@@ -635,10 +640,34 @@ void riwayatPinjaman() {
         cin >> pilihan;
 
         if (pilihan == 1) {
-            current = current->next;
+            if (current->next == NULL) {
+                cout << "Kembali ke riwayat pertama..." << endl;
+                this_thread::sleep_for(chrono::seconds(1));
+                current = headRiwayat;
+            } else {
+                current = current->next;
+            }
         }
 
         else if (pilihan == 3) {
+            char konfirmasi;
+            while (true) {
+                cout << "Apakah anda yakin ingin memproses pengembalian buku ini? (y/n) ";
+                cout << "> ";
+                cin >> konfirmasi;
+                if (konfirmasi == 'y' || konfirmasi == 'n' || konfirmasi == 'Y' || konfirmasi == 'N') {
+                    break;
+                }
+                clearError();
+                cout << "Input tidak valid. Silakan masukkan 'y' atau 'n'." << endl;
+                this_thread::sleep_for(chrono::seconds(1));
+            }
+
+            if (konfirmasi == 'n' || konfirmasi == 'N') {
+                cout << "Pengembalian dibatalkan." << endl;
+                this_thread::sleep_for(chrono::seconds(1));
+                continue;
+            }
 
             pushKembali(current->data);
             cout << "Buku \"" << current->data.judul << "\" telah dikembalikan !!" << endl;
