@@ -29,6 +29,7 @@ Node* head = NULL;
 // struct data pinjaman queue
 struct Pinjaman {
     string id;
+    string idBuku;
     string judul;
     string nama;
     long long nim;
@@ -42,6 +43,39 @@ struct NodePinjam {
 
 NodePinjam* frontPinjam = NULL;
 NodePinjam* rearPinjam = NULL;
+
+
+// struct data riwayat pinjaman
+struct NodeRiwayat {
+    Pinjaman data;
+    NodeRiwayat* next;
+};
+
+NodeRiwayat* headRiwayat = NULL;
+
+
+// stack untuk pengembalian
+struct NodeKembali {
+    Pinjaman data;
+    NodeKembali* next;
+};
+
+NodeKembali* topKembali = NULL;
+
+void pushKembali(Pinjaman p) {
+    NodeKembali* newNode = new NodeKembali;
+    newNode->data = p;
+    newNode->next = topKembali;
+    topKembali = newNode;
+}
+
+void popKembali() {
+    if (topKembali == NULL) return;
+
+    NodeKembali* temp = topKembali;
+    topKembali = topKembali->next;
+    delete temp;
+}
 
 
 
@@ -79,7 +113,7 @@ void welcomeMSG() {
     cout << "===========================" << endl;
     cout << "1. Masuk sebagai pegawai" << endl;
     cout << "2. Masuk sebagai pengunjung" << endl;
-    cout << "0. Keluar" << endl << endl;
+    cout << "0. Keluar" << endl;
 }
 
 
@@ -93,7 +127,8 @@ void menuAdmin() {
     cout << "3. mengubah data buku" << endl;
     cout << "4. menghapus data buku" << endl;
     cout << "5. Proses permintaan pinjaman" << endl;
-    cout << "0. Keluar" << endl << endl;
+    cout << "6. Proses pengembalian buku" << endl;
+    cout << "0. Kembali" << endl;
 }
 
 
@@ -406,7 +441,7 @@ void editBuku() {
     cout << "3. Ubah tahun terbit" << endl;
     cout << "4. Ubah genre" << endl;
     cout << "5. Ubah ketersediaan" << endl;
-    cout << "0. Keluar" << endl;
+    cout << "0. Kembali" << endl;
     cout << "Pilih: ";
     
     int pilihanEdit;
@@ -491,6 +526,24 @@ void editBuku() {
 }
 
 
+
+void tambahRiwayat(Pinjaman p) {
+    NodeRiwayat* newNode = new NodeRiwayat;
+    newNode->data = p;
+    newNode->next = NULL;
+
+    if (headRiwayat == NULL) {
+        headRiwayat = newNode;
+    } else {
+        NodeRiwayat* temp = headRiwayat;
+        while (temp->next != NULL) {
+            temp = temp->next;
+        }
+        temp->next = newNode;
+    }
+}
+
+
 void prosesPinjaman() {
 
     cout << endl;
@@ -520,25 +573,147 @@ void prosesPinjaman() {
 
         cout << "1. Setujui" << endl;
         cout << "2. Tolak" << endl;
-        cout << "0. Keluar" << endl;
+        cout << "0. Kembali" << endl;
         cout << "> ";
 
-        int pilih;
-        cin >> pilih;
+        int pilihan;
+        cin >> pilihan;
 
-        if (pilih == 1) {
+        if (pilihan == 1) {
+            Node* buku = head;
+            while (buku != NULL) {
+                if (buku->data.id == p.idBuku) {
+                    buku->data.Tersedia = false;
+                    break;
+                }
+                buku = buku->next;
+            }
+
             cout << "Pinjaman dengan id " << p.id << " telah diproses !!" << endl;
+            tambahRiwayat(p);
             dequeuePinjam();
         }
 
-        else if (pilih == 2) {
+        else if (pilihan == 2) {
             cout << "Pinjaman ditolak." << endl;
             dequeuePinjam();
         }
 
-        else if (pilih == 0) {
+        else if (pilihan == 0) {
             break;
         }
+
+        nomor++;
+    }
+}
+
+
+void riwayatPinjaman() {
+
+    if (headRiwayat == NULL) {
+        cout << "Belum ada riwayat pinjaman." << endl;
+        return;
+    }
+
+    NodeRiwayat* current = headRiwayat;
+
+    while (current != NULL) {
+
+        cout << "--------------------------------------" << endl;
+        cout << "Id : " << current->data.id << endl;
+        cout << "Judul : " << current->data.judul << endl;
+        cout << "Nama : " << current->data.nama << endl;
+        cout << "NIM : " << current->data.nim << endl;
+        cout << "Tanggal : " << current->data.tanggal << endl;
+        cout << "--------------------------------------" << endl;
+
+        cout << "1. Selanjutnya" << endl;
+        cout << "3. Kembalikan Buku" << endl;
+        cout << "0. Kembali" << endl;
+
+        int pilihan;
+        cin >> pilihan;
+
+        if (pilihan == 1) {
+            current = current->next;
+        }
+
+        else if (pilihan == 3) {
+
+            pushKembali(current->data);
+            cout << "Buku \"" << current->data.judul << "\" telah dikembalikan !!" << endl;
+
+            NodeRiwayat* temp = headRiwayat;
+            NodeRiwayat* prev = NULL;
+
+            while (temp != NULL && temp != current) {
+                prev = temp;
+                temp = temp->next;
+            }
+
+            if (temp != NULL) {
+                if (prev == NULL)
+                    headRiwayat = temp->next;
+                else
+                    prev->next = temp->next;
+
+                delete temp;
+            }
+
+            break;
+        }
+
+        else if (pilihan == 0)
+            break;
+    }
+}
+
+
+void prosesPengembalian() {
+
+    if (topKembali == NULL) {
+        cout << "Tidak ada pengembalian untuk diproses !!" << endl;
+        return;
+    }
+
+    int nomor = 1;
+
+    while (topKembali != NULL) {
+
+        Pinjaman p = topKembali->data;
+
+        cout << "======================================" << endl;
+        cout << "PENGEMBALIAN KE-" << nomor << endl;
+        cout << "======================================" << endl;
+
+        cout << "Id : " << p.id << endl;
+        cout << "Judul : " << p.judul << endl;
+        cout << "Nama : " << p.nama << endl;
+        cout << "NIM : " << p.nim << endl;
+        cout << "Tanggal : " << p.tanggal << endl;
+
+        cout << "1. Proses" << endl;
+        cout << "0. Kembali" << endl;
+
+        int pilihan;
+        cin >> pilihan;
+
+        if (pilihan == 1) {
+            Node* buku = head;
+            while (buku != NULL) {
+                if (buku->data.id == p.idBuku) {
+                    buku->data.Tersedia = true;
+                    break;
+                }
+                buku = buku->next;
+            }
+
+            cout << "Buku \"" << p.judul << "\" telah dikembalikan !!" << endl;
+            popKembali();
+        }
+
+        else if (pilihan == 0)
+            break;
 
         nomor++;
     }
@@ -590,7 +765,7 @@ void tampilanAdmin() {
         while(true){
             cout << "1. Selanjutnya" << endl;
             cout << "2. Sebelumnya" << endl;
-            cout << "0. Keluar" << endl;
+            cout << "0. Kembali" << endl;
             cout << "> ";
             cin >> pilihan;
 
@@ -680,7 +855,7 @@ void tampilanPengunjung() {
             cout << "1. Selanjutnya" << endl;
             cout << "2. Sebelumnya" << endl;
             cout << "3. Pinjam" << endl;
-            cout << "0. Keluar" << endl;
+            cout << "0. Kembali" << endl;
             cout << "> ";
             cin >> pilihan;
 
@@ -758,6 +933,7 @@ void tampilanPengunjung() {
             }
 
             pinjam.judul = current->data.judul;
+            pinjam.idBuku = current->data.id;
             pinjam.tanggal = TanggalSekarang();
 
             static int nomor = 1;
@@ -788,7 +964,6 @@ void tampilanPengunjung() {
 }
 
 
-
  
 // ============ main program ============
 int main() {
@@ -799,7 +974,7 @@ int main() {
         // untuk pilihan utama
         while(true){
             welcomeMSG();
-            cout << "Masukkan pilihan: ";
+            cout << "> ";
             cin >> pilihanUtama;
 
             if (cin.fail() || pilihanUtama < 0 || pilihanUtama > 2) {
@@ -822,13 +997,12 @@ int main() {
 
             while (true) {
 
-                // untuk pilihan admin
                 while(true){
                     menuAdmin();
-                    cout << "Masukkan pilihan: ";
+                    cout << "> ";
                     cin >> pilihanAdmin;
 
-                    if (cin.fail() || pilihanAdmin < 0 || pilihanAdmin > 5) {
+                    if (cin.fail() || pilihanAdmin < 0 || pilihanAdmin > 6) {
                         cout << "Input tidak valid! Harap masukkan angka dengan benar." << endl;
                         clearError();
                         continue;
@@ -861,14 +1035,52 @@ int main() {
                 else if (pilihanAdmin == 5) {
                     prosesPinjaman();
                 }
+
+                else if (pilihanAdmin == 6) {
+                    prosesPengembalian();
+                }
             }
         }
 
         else if (pilihanUtama == 2) {  // Pengunjung
-            tampilanPengunjung();
+            int pilihanPengguna;
+            while(true){
+
+                while(true){
+                    cout << endl;
+                    cout << "======================================" << endl;
+                    cout << "         DASHBOARD PENGGUNA" << endl;
+                    cout << "======================================" << endl;
+                    cout << "1. Daftar Buku" << endl;
+                    cout << "2. Riwayat Pinjaman" << endl;
+                    cout << "0. Kembali" << endl;
+                    cout << "> ";
+                    cin >> pilihanPengguna;
+    
+                    if (cin.fail() || pilihanPengguna < 0 || pilihanPengguna > 2) {
+                        cout << "Input tidak valid! Harap masukkan angka dengan benar." << endl;
+                        clearError();
+                        continue;
+                    } else {
+                        break;
+                    }
+                }
+    
+                if (pilihanPengguna == 0) {
+                    break;
+                }
+    
+                else if (pilihanPengguna == 1) {  
+                    tampilanPengunjung();
+    
+                }
+    
+                else if (pilihanPengguna == 2) { 
+                    riwayatPinjaman();
+                }
+            }
         }
     }
-
 
 
 
